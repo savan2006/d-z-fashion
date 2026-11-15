@@ -2,9 +2,9 @@ spring:
   application:
     name: identity-service
   datasource:
-    url: ${SUPABASE_JDBC_URL}
-    username: ${IDENTITY_DB_USERNAME}
-    password: ${IDENTITY_DB_PASSWORD}
+    url: ${SUPABASE_JDBC_URL:}
+    username: ${IDENTITY_DB_USERNAME:}
+    password: ${IDENTITY_DB_PASSWORD:}
     hikari:
       maximum-pool-size: ${DB_POOL_MAX_SIZE:3}
       minimum-idle: ${DB_POOL_MIN_IDLE:1}
@@ -18,8 +18,32 @@ spring:
     default-schema: identity
     schemas: identity
     create-schemas: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: ${MAIL_STARTTLS:false}
+
 server:
   port: ${IDENTITY_SERVICE_PORT:8081}
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:dz-fashion}
+    secret: ${JWT_SECRET:dz-fashion-secure-jwt-signing-secret-key-minimum-32-bytes!}
+    access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
+    refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:14}
+  otp:
+    ttl-minutes: ${OTP_TTL_MINUTES:5}
+    resend-cooldown-seconds: ${OTP_RESEND_COOLDOWN_SECONDS:60}
+    max-attempts: ${OTP_MAX_ATTEMPTS:5}
+
 management:
   endpoints:
     web:
@@ -29,6 +53,7 @@ management:
     health:
       probes:
         enabled: true
+
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
