@@ -1,0 +1,40 @@
+# Private AI prompts, skills, context, reference material and agent configuration
+.ai-workspace/
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Java / Maven
+**/target/
+**/*.class
+**/*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# Node / Next.js
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/coverage/
+**/.turbo/
+**/.vercel/
+
+# IDEs and local state
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Temporary / generated files
+*.tmp
+*.swp
+*.bak

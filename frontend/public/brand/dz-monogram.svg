@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-labelledby="title">
+  <title id="title">D and Z monogram</title>
+  <rect x="5" y="5" width="150" height="150" fill="#6d333e"/>
+  <path d="M35 34H63C93 34 111 51 111 80S93 126 63 126H35V34Z" fill="none" stroke="#f7f4ef" stroke-width="5"/>
+  <path d="M76 51H126L80 109H127" fill="none" stroke="#e6cfc3" stroke-width="5" stroke-linecap="square"/>
+</svg>

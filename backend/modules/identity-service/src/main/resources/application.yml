@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: identity-service
+  datasource:
+    url: ${SUPABASE_JDBC_URL}
+    username: ${IDENTITY_DB_USERNAME}
+    password: ${IDENTITY_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:3}
+      minimum-idle: ${DB_POOL_MIN_IDLE:1}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:30000}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    default-schema: identity
+    schemas: identity
+    create-schemas: true
+server:
+  port: ${IDENTITY_SERVICE_PORT:8081}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.dzfashion: ${LOG_LEVEL_DZ:INFO}
