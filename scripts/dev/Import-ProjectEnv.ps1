@@ -1,7 +1,18 @@
 [CmdletBinding()]
 param(
-    [string]$EnvironmentFile = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) '.env')
+    [string]$EnvironmentFile
 )
+
+if (-not $EnvironmentFile) {
+    $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path } else { $null }
+    if ($scriptDir) {
+        $rootDir = Split-Path -Parent (Split-Path -Parent $scriptDir)
+        $EnvironmentFile = Join-Path $rootDir '.env'
+    } else {
+        $EnvironmentFile = Join-Path (Get-Location) '.env'
+    }
+}
+
 $resolved = [System.IO.Path]::GetFullPath($EnvironmentFile)
 if (-not (Test-Path -LiteralPath $resolved)) {
     throw "Environment file not found: $resolved. Copy .env.example to .env and fill local values."
