@@ -35,4 +35,23 @@ class CommerceMigrationValidationTests {
         assertFalse(sql.contains("REFERENCES identity."), "Must not contain cross-schema foreign keys");
         assertFalse(sql.contains("REFERENCES inventory."), "Must not contain cross-schema foreign keys");
     }
+
+    @Test
+    @DisplayName("Verify Commerce V2 migration script defines claim history, shortage incidents, outbox, and order enhancements")
+    void testCommerceV2MigrationScript() throws IOException {
+        ClassPathResource resource = new ClassPathResource("db/migration/V2__commerce_enhancements.sql");
+        assertTrue(resource.exists(), "Commerce V2 migration script must exist");
+
+        String sql = resource.getContentAsString(StandardCharsets.UTF_8);
+        assertFalse(sql.isBlank(), "Migration script must not be empty");
+
+        assertTrue(sql.contains("ALTER TABLE orders ADD COLUMN IF NOT EXISTS idempotency_key"), "Must add idempotency key");
+        assertTrue(sql.contains("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_by"), "Must add cancelled_by");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS order_claim_history"), "Must create order_claim_history table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS order_shortage_incidents"), "Must create order_shortage_incidents table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS outbox_events"), "Must create outbox_events table");
+
+        assertFalse(sql.contains("REFERENCES catalog."), "Must not contain cross-schema foreign keys");
+        assertFalse(sql.contains("REFERENCES inventory."), "Must not contain cross-schema foreign keys");
+    }
 }
