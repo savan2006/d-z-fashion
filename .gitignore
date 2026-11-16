@@ -23,6 +23,8 @@
 **/coverage/
 **/.turbo/
 **/.vercel/
+*.tsbuildinfo
+**/*.tsbuildinfo
 
 # IDEs and local state
 .idea/
