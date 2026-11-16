@@ -1,0 +1,17 @@
+package com.dzfashion.fulfillment.enums;
+
+public enum ReturnRequestStatus {
+    REQUESTED,
+    PICKUP_SCHEDULED,
+    PICKED_UP,
+    IN_TRANSIT_TO_SURAT,
+    RECEIVED_AT_SURAT,
+    INSPECTED,
+    EXCHANGE_PREPARED,
+    EXCHANGE_DISPATCHED,
+    REFUND_PENDING_OWNER_APPROVAL,
+    REFUND_APPROVED,
+    REFUND_PROCESSED,
+    REJECTED,
+    CLOSED
+}

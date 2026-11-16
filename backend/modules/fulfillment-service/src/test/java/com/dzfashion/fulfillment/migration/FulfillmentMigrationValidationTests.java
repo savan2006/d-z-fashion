@@ -52,4 +52,23 @@ class FulfillmentMigrationValidationTests {
         assertFalse(sql.contains("REFERENCES commerce."), "Must not contain cross-schema foreign keys");
         assertFalse(sql.contains("REFERENCES payment."), "Must not contain cross-schema foreign keys");
     }
+
+    @Test
+    @DisplayName("Verify Fulfillment V3 migration script adds return requests, pickup tracking, exchange fields, and inspection disposition")
+    void testFulfillmentV3MigrationScript() throws IOException {
+        ClassPathResource resource = new ClassPathResource("db/migration/V3__return_and_exchange_workflow.sql");
+        assertTrue(resource.exists(), "Fulfillment V3 migration script must exist");
+
+        String sql = resource.getContentAsString(StandardCharsets.UTF_8);
+        assertFalse(sql.isBlank(), "Migration script must not be empty");
+
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS return_requests"), "Must create return_requests table");
+        assertTrue(sql.contains("CHECK (reason IN ('DAMAGED', 'DEFECTIVE', 'INCORRECT_PRODUCT'))"), "Must enforce strict 3-day return policy reasons");
+        assertTrue(sql.contains("CHECK (resolution_type IN ('EXCHANGE', 'REFUND'))"), "Must validate resolution type");
+        assertTrue(sql.contains("ALTER TABLE return_inspections ADD COLUMN IF NOT EXISTS disposition"), "Must enhance return inspections with disposition");
+        assertTrue(sql.contains("fk_return_inspection_request"), "Must link return inspections to return requests");
+
+        assertFalse(sql.contains("REFERENCES commerce."), "Must not contain cross-schema foreign keys");
+        assertFalse(sql.contains("REFERENCES payment."), "Must not contain cross-schema foreign keys");
+    }
 }

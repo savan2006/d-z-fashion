@@ -35,4 +35,22 @@ class CatalogMigrationValidationTests {
         assertFalse(sql.contains("REFERENCES inventory."), "Must not contain cross-schema foreign keys");
         assertFalse(sql.contains("REFERENCES identity."), "Must not contain cross-schema foreign keys");
     }
+
+    @Test
+    @DisplayName("Verify Catalog V2 migration script defines product_reviews table with verified purchase constraints")
+    void testCatalogV2MigrationScript() throws IOException {
+        ClassPathResource resource = new ClassPathResource("db/migration/V2__product_reviews.sql");
+        assertTrue(resource.exists(), "Catalog V2 migration script must exist");
+
+        String sql = resource.getContentAsString(StandardCharsets.UTF_8);
+        assertFalse(sql.isBlank(), "Migration script must not be empty");
+
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS product_reviews"), "Must create product_reviews table");
+        assertTrue(sql.contains("order_item_id UUID NOT NULL UNIQUE"), "Must enforce one review per purchased order line");
+        assertTrue(sql.contains("CHECK (rating >= 1 AND rating <= 5)"), "Must enforce 1-5 star ratings");
+        assertTrue(sql.contains("CHECK (status IN ('PUBLISHED', 'HIDDEN', 'REMOVED'))"), "Must enforce valid review statuses");
+
+        assertFalse(sql.contains("REFERENCES commerce."), "Must not contain cross-schema foreign keys");
+        assertFalse(sql.contains("REFERENCES fulfillment."), "Must not contain cross-schema foreign keys");
+    }
 }

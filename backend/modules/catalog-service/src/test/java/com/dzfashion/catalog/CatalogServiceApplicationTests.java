@@ -3,6 +3,7 @@ package com.dzfashion.catalog;
 import com.dzfashion.catalog.repository.CategoryRepository;
 import com.dzfashion.catalog.repository.MediaAssetRepository;
 import com.dzfashion.catalog.repository.ProductRepository;
+import com.dzfashion.catalog.repository.ProductReviewRepository;
 import com.dzfashion.catalog.repository.ProductRevisionRepository;
 import com.dzfashion.catalog.repository.ProductVariantRepository;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class CatalogServiceApplicationTests {
 
     @MockitoBean
     private MediaAssetRepository mediaAssetRepository;
+
+    @MockitoBean
+    private ProductReviewRepository productReviewRepository;
 
     @Test
     void contextLoads() {

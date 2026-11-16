@@ -37,6 +37,12 @@ class FulfillmentServiceApplicationTests {
     @MockitoBean
     private OutboxEventRepository outboxEventRepository;
 
+    @MockitoBean
+    private com.dzfashion.fulfillment.repository.ReturnRequestRepository returnRequestRepository;
+
+    @MockitoBean
+    private com.dzfashion.fulfillment.repository.ReturnInspectionRepository returnInspectionRepository;
+
     @Test
     void contextLoads() {
     }
