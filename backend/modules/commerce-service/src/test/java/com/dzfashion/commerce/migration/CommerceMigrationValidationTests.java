@@ -54,4 +54,26 @@ class CommerceMigrationValidationTests {
         assertFalse(sql.contains("REFERENCES catalog."), "Must not contain cross-schema foreign keys");
         assertFalse(sql.contains("REFERENCES inventory."), "Must not contain cross-schema foreign keys");
     }
+
+    @Test
+    @DisplayName("Verify Commerce V3 migration script defines support tickets, notifications, audit trail, and processed events")
+    void testCommerceV3MigrationScript() throws IOException {
+        ClassPathResource resource = new ClassPathResource("db/migration/V3__integration_support_notifications_audit.sql");
+        assertTrue(resource.exists(), "Commerce V3 migration script must exist");
+
+        String sql = resource.getContentAsString(StandardCharsets.UTF_8);
+        assertFalse(sql.isBlank(), "Migration script must not be empty");
+
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS support_tickets"), "Must create support_tickets table");
+        assertTrue(sql.contains("CHECK (channel IN ('WEB', 'WHATSAPP', 'PHONE'))"), "Must support multi-channel intake");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS support_ticket_messages"), "Must create support_ticket_messages table");
+        assertTrue(sql.contains("is_internal_note BOOLEAN"), "Must support internal staff notes hidden from customer");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS notifications"), "Must create in-account notifications table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS notification_deliveries"), "Must create notification_deliveries tracking table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS audit_logs"), "Must create audit_logs table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS processed_events"), "Must create processed_events table for idempotency");
+
+        assertFalse(sql.contains("REFERENCES identity."), "Must not contain cross-schema foreign keys");
+        assertFalse(sql.contains("REFERENCES fulfillment."), "Must not contain cross-schema foreign keys");
+    }
 }

@@ -1,13 +1,19 @@
 package com.dzfashion.commerce;
 
+import com.dzfashion.commerce.repository.AuditLogRepository;
 import com.dzfashion.commerce.repository.CartItemRepository;
 import com.dzfashion.commerce.repository.CartRepository;
 import com.dzfashion.commerce.repository.CodServiceablePincodeRepository;
+import com.dzfashion.commerce.repository.NotificationDeliveryRepository;
+import com.dzfashion.commerce.repository.NotificationRepository;
 import com.dzfashion.commerce.repository.OrderClaimHistoryRepository;
 import com.dzfashion.commerce.repository.OrderItemRepository;
 import com.dzfashion.commerce.repository.OrderRepository;
 import com.dzfashion.commerce.repository.OrderShortageIncidentRepository;
 import com.dzfashion.commerce.repository.OutboxEventRepository;
+import com.dzfashion.commerce.repository.ProcessedEventRepository;
+import com.dzfashion.commerce.repository.SupportTicketMessageRepository;
+import com.dzfashion.commerce.repository.SupportTicketRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,6 +46,24 @@ class CommerceServiceApplicationTests {
 
     @MockitoBean
     private OutboxEventRepository outboxEventRepository;
+
+    @MockitoBean
+    private SupportTicketRepository supportTicketRepository;
+
+    @MockitoBean
+    private SupportTicketMessageRepository supportTicketMessageRepository;
+
+    @MockitoBean
+    private NotificationRepository notificationRepository;
+
+    @MockitoBean
+    private NotificationDeliveryRepository notificationDeliveryRepository;
+
+    @MockitoBean
+    private AuditLogRepository auditLogRepository;
+
+    @MockitoBean
+    private ProcessedEventRepository processedEventRepository;
 
     @Test
     void contextLoads() {

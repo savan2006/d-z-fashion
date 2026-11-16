@@ -1,6 +1,34 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: identity-service
+            uri: http://${IDENTITY_HOST:localhost}:${IDENTITY_PORT:8081}
+            predicates:
+              - Path=/api/v1/auth/**, /api/v1/users/**
+          - id: catalog-service
+            uri: http://${CATALOG_HOST:localhost}:${CATALOG_PORT:8082}
+            predicates:
+              - Path=/api/v1/categories/**, /api/v1/products/**, /api/v1/admin/products/**, /api/v1/admin/reviews/**, /api/v1/catalog/**
+          - id: inventory-service
+            uri: http://${INVENTORY_HOST:localhost}:${INVENTORY_PORT:8083}
+            predicates:
+              - Path=/api/v1/inventory/**
+          - id: commerce-service
+            uri: http://${COMMERCE_HOST:localhost}:${COMMERCE_PORT:8084}
+            predicates:
+              - Path=/api/v1/cart/**, /api/v1/checkout/**, /api/v1/orders/**, /api/v1/admin/orders/**, /api/v1/admin/cod-pincodes/**, /api/v1/cod-pincodes/**, /api/v1/support/**, /api/v1/admin/support/**, /api/v1/notifications/**, /api/v1/admin/reports/**, /api/v1/admin/audit-logs/**
+          - id: payment-service
+            uri: http://${PAYMENT_HOST:localhost}:${PAYMENT_PORT:8085}
+            predicates:
+              - Path=/api/v1/payments/**, /api/v1/coupons/**, /api/v1/store-credit/**, /api/v1/invoices/**, /api/v1/tax/**
+          - id: fulfillment-service
+            uri: http://${FULFILLMENT_HOST:localhost}:${FULFILLMENT_PORT:8086}
+            predicates:
+              - Path=/api/v1/shipments/**, /api/v1/fulfillment/**
 server:
   port: ${API_GATEWAY_PORT:8080}
 management:
@@ -16,3 +44,4 @@ logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     com.dzfashion: ${LOG_LEVEL_DZ:INFO}
+    org.springframework.cloud.gateway: INFO

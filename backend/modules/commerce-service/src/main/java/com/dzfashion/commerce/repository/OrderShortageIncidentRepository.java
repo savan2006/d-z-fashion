@@ -15,4 +15,5 @@ public interface OrderShortageIncidentRepository extends JpaRepository<OrderShor
     List<OrderShortageIncidentEntity> findByOrderId(UUID orderId);
     List<OrderShortageIncidentEntity> findByStatusOrderByCreatedAtDesc(ShortageIncidentStatus status);
     List<OrderShortageIncidentEntity> findAllByOrderByCreatedAtDesc();
+    long countByStatus(ShortageIncidentStatus status);
 }
