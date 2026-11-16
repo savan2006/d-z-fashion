@@ -1,10 +1,10 @@
 spring:
   application:
-    name: fulfillment-service
+  name: fulfillment-service
   datasource:
-    url: ${SUPABASE_JDBC_URL}
-    username: ${FULFILLMENT_DB_USERNAME}
-    password: ${FULFILLMENT_DB_PASSWORD}
+    url: ${SUPABASE_JDBC_URL:}
+    username: ${FULFILLMENT_DB_USERNAME:postgres}
+    password: ${FULFILLMENT_DB_PASSWORD:postgres}
     hikari:
       maximum-pool-size: ${DB_POOL_MAX_SIZE:3}
       minimum-idle: ${DB_POOL_MIN_IDLE:1}
@@ -18,6 +18,20 @@ spring:
     default-schema: fulfillment
     schemas: fulfillment
     create-schemas: true
+
+jwt:
+  issuer: dz-fashion-identity
+  secret: ${JWT_SECRET:d-z-fashion-super-secret-key-for-local-development-minimum-32-chars!}
+
+fulfillment:
+  warehouse-name: ${WAREHOUSE_NAME:Surat Central Warehouse}
+  warehouse-address: ${WAREHOUSE_ADDRESS:Surat Central Warehouse, Ring Road, Surat, Gujarat - 395002}
+  warehouse-city: ${WAREHOUSE_CITY:Surat}
+  warehouse-state: ${WAREHOUSE_STATE:Gujarat}
+  warehouse-pincode: ${WAREHOUSE_PINCODE:395002}
+  max-delivery-attempts: 2
+  return-window-days: 3
+
 server:
   port: ${FULFILLMENT_SERVICE_PORT:8086}
 management:

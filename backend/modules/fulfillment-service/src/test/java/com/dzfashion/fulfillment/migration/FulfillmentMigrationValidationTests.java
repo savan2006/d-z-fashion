@@ -32,4 +32,24 @@ class FulfillmentMigrationValidationTests {
         assertFalse(sql.contains("REFERENCES commerce."), "Must not contain cross-schema foreign keys");
         assertFalse(sql.contains("REFERENCES inventory."), "Must not contain cross-schema foreign keys");
     }
+
+    @Test
+    @DisplayName("Verify Fulfillment V2 migration script adds line items, attempt logs, agency settlements, and outbox")
+    void testFulfillmentV2MigrationScript() throws IOException {
+        ClassPathResource resource = new ClassPathResource("db/migration/V2__fulfillment_enhancements.sql");
+        assertTrue(resource.exists(), "Fulfillment V2 migration script must exist");
+
+        String sql = resource.getContentAsString(StandardCharsets.UTF_8);
+        assertFalse(sql.isBlank(), "Migration script must not be empty");
+
+        assertTrue(sql.contains("ALTER TABLE shipments ALTER COLUMN transport_agency_id DROP NOT NULL"), "Must allow nullable transport agency before handover");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS shipment_items"), "Must create shipment_items table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS delivery_attempt_logs"), "Must create delivery_attempt_logs table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS agency_cod_settlements"), "Must create agency_cod_settlements table");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS outbox_events"), "Must create outbox_events table");
+        assertTrue(sql.contains("CHECK (attempt_number IN (1, 2))"), "Must enforce attempt 1 or 2 check");
+
+        assertFalse(sql.contains("REFERENCES commerce."), "Must not contain cross-schema foreign keys");
+        assertFalse(sql.contains("REFERENCES payment."), "Must not contain cross-schema foreign keys");
+    }
 }
