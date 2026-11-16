@@ -1,0 +1,27 @@
+package com.dzfashion.payment.dto.request;
+
+import com.dzfashion.payment.enums.StoreCreditReferenceType;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public record IssueStoreCreditRequest(
+        @NotNull(message = "Customer ID is required")
+        UUID customerId,
+
+        @NotNull(message = "Amount is required")
+        @DecimalMin(value = "0.01", message = "Amount must be strictly positive")
+        BigDecimal amount,
+
+        @NotNull(message = "Reference type is required")
+        StoreCreditReferenceType referenceType,
+
+        @NotBlank(message = "Reference ID is required")
+        String referenceId,
+
+        String notes
+) {
+}
