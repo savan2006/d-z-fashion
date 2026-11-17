@@ -24,18 +24,22 @@ vi.mock('next/navigation', () => ({
 
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
-  default: ({ fill, priority, ...props }: any) => {
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+    const { fill: _f, priority: _p, ...rest } = props;
+    void _f;
+    void _p;
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} alt={props.alt || ''} />;
+    return <img {...rest} alt={props.alt || ''} />;
   },
 }));
 
 // Mock catalogApi
 vi.mock('@/lib/api/catalog', async () => {
-  const actual = await vi.importActual<any>('@/lib/api/catalog');
+  const actual = await vi.importActual<typeof import('@/lib/api/catalog')>('@/lib/api/catalog');
   return {
     ...actual,
     catalogApi: {
+      ...actual.catalogApi,
       ...actual.catalogApi,
       getVariantStock: vi.fn().mockImplementation((variantId: string) => {
         if (variantId === 'var-soldout') {
