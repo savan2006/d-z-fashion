@@ -1,19 +1,57 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Sparkles, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { EditorialPlaceholder } from '@/components/brand/EditorialPlaceholder';
 import { LinkButton } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-
-const CATEGORIES = [
-  { name: 'New Arrivals', count: '18 styles', href: '/collections?cat=new' },
-  { name: 'Indian Wear', count: '42 styles', href: '/collections?cat=indian' },
-  { name: 'Western Wear', count: '29 styles', href: '/collections?cat=western' },
-  { name: 'Dresses & Co-ords', count: '24 styles', href: '/collections?cat=dresses' },
-  { name: 'Everyday Essentials', count: '16 styles', href: '/collections?cat=essentials' },
-];
+import { ProductCard } from '@/components/storefront/ProductCard';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Category, ProductSummary, catalogApi } from '@/lib/api/catalog';
 
 export default function HomePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [newArrivals, setNewArrivals] = useState<ProductSummary[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    catalogApi
+      .getCategories(false)
+      .then((res) => {
+        if (isMounted && res.data) {
+          setCategories(res.data.filter((c) => c.active));
+        }
+      })
+      .catch(() => {
+        // Fallback gracefully without breaking layout
+      })
+      .finally(() => {
+        if (isMounted) setLoadingCategories(false);
+      });
+
+    catalogApi
+      .getProducts({ page: 0, pageSize: 4, sort: 'createdAt,desc' })
+      .then((res) => {
+        if (isMounted && res.data && res.data.content) {
+          setNewArrivals(res.data.content);
+        }
+      })
+      .catch(() => {
+        // Fallback gracefully
+      })
+      .finally(() => {
+        if (isMounted) setLoadingProducts(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div>
       {/* Hero Section */}
@@ -32,7 +70,7 @@ export default function HomePage() {
         <div style={{ maxWidth: '520px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <Badge variant="wine" icon={<Sparkles size={12} />}>
-              The D &amp; Z Edit &bull; Autumn / Festive 2026
+              Surat Atelier &bull; Autumn / Festive 2026
             </Badge>
           </div>
 
@@ -59,7 +97,7 @@ export default function HomePage() {
               maxWidth: '440px',
             }}
           >
-            A thoughtful edit of women’s and girls’ clothing, designed with restraint,
+            A thoughtful edit of women’s and girls’ garments, designed with restraint,
             crafted in Surat, and made for the moments that make up your everyday.
           </p>
 
@@ -70,14 +108,14 @@ export default function HomePage() {
               size="lg"
               endIcon={<ArrowUpRight size={18} />}
             >
-              Explore the Collection
+              Explore Collections
             </LinkButton>
             <LinkButton
               href="/design-system"
               variant="outline"
               size="lg"
             >
-              View Design System
+              Design System
             </LinkButton>
           </div>
 
@@ -88,11 +126,12 @@ export default function HomePage() {
               marginTop: '40px',
               paddingTop: '24px',
               borderTop: '1px solid var(--line)',
+              flexWrap: 'wrap',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Truck size={16} color="var(--wine)" />
-              <span style={{ fontSize: '12px', color: 'var(--ink-muted)' }}>Free delivery over ₹2,000</span>
+              <span style={{ fontSize: '12px', color: 'var(--ink-muted)' }}>Free delivery over ₹2,000 (pre-GST)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <RefreshCw size={16} color="var(--wine)" />
@@ -110,9 +149,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Collections Section */}
+      {/* Dynamic Database-Driven Categories Section */}
       <section
-        id="collections"
+        id="categories"
         style={{
           borderTop: '1px solid var(--line)',
           padding: '64px clamp(20px, 6vw, 96px)',
@@ -131,7 +170,7 @@ export default function HomePage() {
             }}
           >
             <div>
-              <p className="eyebrow">Curated Categories</p>
+              <p className="eyebrow">Database-Driven Wardrobe</p>
               <h2
                 className="font-serif"
                 style={{
@@ -141,59 +180,155 @@ export default function HomePage() {
                   letterSpacing: '-0.03em',
                 }}
               >
-                Explore the Season Edit
+                Curated Collections
               </h2>
             </div>
-            <p style={{ maxWidth: '320px', fontSize: 'var(--text-body-sm)', color: 'var(--ink-muted)', margin: 0 }}>
+            <p style={{ maxWidth: '340px', fontSize: 'var(--text-body-sm)', color: 'var(--ink-muted)', margin: 0 }}>
               Each garment is patterned, sampled and finished in Surat with attention to drape, fabric weight and ease of wear.
             </p>
           </div>
 
           <div style={{ borderTop: '1px solid var(--line)' }}>
-            {CATEGORIES.map((cat, idx) => (
-              <Link
-                key={cat.name}
-                href={cat.href}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '80px 1fr auto auto',
-                  alignItems: 'center',
-                  minHeight: '76px',
-                  borderBottom: '1px solid var(--line)',
-                  padding: '0 8px',
-                  transition: 'background-color var(--transition-fast), padding var(--transition-fast)',
-                }}
-              >
-                <span style={{ fontSize: '11px', color: 'var(--ink-subtle)', fontFamily: 'var(--font-mono)' }}>
-                  0{idx + 1}
-                </span>
-                <span
-                  className="font-serif"
-                  style={{ fontSize: 'var(--text-heading-md)', color: 'var(--ink)' }}
-                >
-                  {cat.name}
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--ink-subtle)', marginRight: '24px' }}>
-                  {cat.count}
-                </span>
-                <span
+            {loadingCategories ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px 0' }}>
+                <Skeleton height="60px" />
+                <Skeleton height="60px" />
+                <Skeleton height="60px" />
+              </div>
+            ) : categories.length > 0 ? (
+              categories.map((cat, idx) => (
+                <Link
+                  key={cat.id || cat.slug}
+                  href={`/collections?category=${encodeURIComponent(cat.slug)}`}
                   style={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: '80px 1fr auto',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--paper-deep)',
-                    color: 'var(--ink)',
+                    minHeight: '76px',
+                    borderBottom: '1px solid var(--line)',
+                    padding: '0 8px',
+                    transition: 'background-color var(--transition-fast), padding var(--transition-fast)',
+                    textDecoration: 'none',
                   }}
                 >
-                  <ArrowUpRight size={16} />
-                </span>
-              </Link>
-            ))}
+                  <span style={{ fontSize: '11px', color: 'var(--ink-subtle)', fontFamily: 'var(--font-mono)' }}>
+                    0{idx + 1}
+                  </span>
+                  <span
+                    className="font-serif"
+                    style={{ fontSize: 'var(--text-heading-md)', color: 'var(--ink)' }}
+                  >
+                    {cat.name}
+                  </span>
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--paper-deep)',
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    <ArrowUpRight size={16} />
+                  </span>
+                </Link>
+              ))
+            ) : (
+              <div style={{ padding: '36px 0', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 16px', color: 'var(--ink-muted)', fontSize: 'var(--text-body-md)' }}>
+                  New seasonal collections are currently being curated at our Surat workshop.
+                </p>
+                <LinkButton href="/collections" variant="outline" size="sm">
+                  Browse All Ready Stock
+                </LinkButton>
+              </div>
+            )}
           </div>
         </div>
+      </section>
+
+      {/* Dynamic New Arrivals Section */}
+      <section
+        style={{
+          padding: '64px clamp(20px, 6vw, 96px)',
+          maxWidth: 'var(--container-max)',
+          margin: '0 auto',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginBottom: '36px',
+            flexWrap: 'wrap',
+            gap: '16px',
+          }}
+        >
+          <div>
+            <p className="eyebrow">Fresh Off The Loom</p>
+            <h2
+              className="font-serif"
+              style={{
+                margin: 0,
+                fontSize: 'var(--text-display-md)',
+                fontWeight: 400,
+                letterSpacing: '-0.03em',
+              }}
+            >
+              Latest Garment Releases
+            </h2>
+          </div>
+          <Link
+            href="/collections?sort=createdAt,desc"
+            style={{
+              fontSize: '13px',
+              color: 'var(--wine)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: 500,
+            }}
+          >
+            <span>View All Garments</span> &rarr;
+          </Link>
+        </div>
+
+        {loadingProducts ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '24px',
+            }}
+          >
+            <Skeleton height="380px" />
+            <Skeleton height="380px" />
+            <Skeleton height="380px" />
+            <Skeleton height="380px" />
+          </div>
+        ) : newArrivals.length > 0 ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '24px',
+            }}
+          >
+            {newArrivals.map((product) => (
+              <ProductCard key={product.id || product.slug} product={product} />
+            ))}
+          </div>
+        ) : (
+          <EditorialPlaceholder
+            index="D&Z / ARRIVALS"
+            caption="SURAT TEXTILE ATELIER &bull; NEW SEASON SILHOUETTES IN PRODUCTION"
+            minHeight="320px"
+          />
+        )}
       </section>
 
       {/* Brand Values / Quality Promise */}
@@ -202,6 +337,7 @@ export default function HomePage() {
           padding: '64px clamp(20px, 6vw, 96px)',
           maxWidth: 'var(--container-max)',
           margin: '0 auto',
+          borderTop: '1px solid var(--line)',
         }}
       >
         <div

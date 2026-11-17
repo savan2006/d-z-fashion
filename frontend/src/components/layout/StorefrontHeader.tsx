@@ -1,24 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrandLogo } from '../brand/BrandLogo';
 import { ShoppingBag, User, Search, Heart, Menu, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { catalogApi, Category } from '@/lib/api/catalog';
 
-const NAV_ITEMS = [
-  { label: 'New Arrivals', href: '/collections?cat=new' },
-  { label: 'Indian Wear', href: '/collections?cat=indian' },
-  { label: 'Western Wear', href: '/collections?cat=western' },
-  { label: 'Dresses', href: '/collections?cat=dresses' },
-  { label: 'Everyday Essentials', href: '/collections?cat=essentials' },
+const FALLBACK_NAV_ITEMS = [
+  { label: 'All Collections', href: '/collections' },
+  { label: 'New Arrivals', href: '/collections?sort=createdAt,desc' },
+  { label: 'Indian Wear', href: '/collections?category=indian-wear' },
+  { label: 'Western Wear', href: '/collections?category=western-wear' },
+  { label: 'Dresses', href: '/collections?category=dresses' },
 ];
 
 export const StorefrontHeader: React.FC = () => {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navItems, setNavItems] = useState(FALLBACK_NAV_ITEMS);
+
+  useEffect(() => {
+    let isMounted = true;
+    catalogApi
+      .getCategories(false)
+      .then((res) => {
+        if (isMounted && res.data && res.data.length > 0) {
+          const dynamicItems = res.data
+            .filter((c: Category) => c.active)
+            .slice(0, 5)
+            .map((c: Category) => ({
+              label: c.name,
+              href: `/collections?category=${encodeURIComponent(c.slug)}`,
+            }));
+          if (dynamicItems.length > 0) {
+            setNavItems([
+              { label: 'All Collections', href: '/collections' },
+              ...dynamicItems,
+            ]);
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback to static items
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>
@@ -42,7 +74,7 @@ export const StorefrontHeader: React.FC = () => {
         </div>
 
         <nav className="storefront-nav" aria-label="Main Storefront Categories">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link key={item.label} href={item.href} className={isActive ? 'active' : ''}>
@@ -156,7 +188,7 @@ export const StorefrontHeader: React.FC = () => {
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <p className="eyebrow" style={{ marginBottom: '8px' }}>Collections</p>
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
