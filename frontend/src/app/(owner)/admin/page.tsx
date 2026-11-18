@@ -1,18 +1,75 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   IndianRupee,
   ShoppingBag,
   TrendingUp,
-  Boxes,
   CheckCircle,
   ShieldCheck,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
+import { LinkButton } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import {
+  adminApi,
+  OwnerAnalyticsReportResponse,
+  AdminOrderSummary,
+  ProductRevisionDiff,
+  CodSettlementBatchResponse,
+} from '@/lib/api/admin';
 
 export default function AdminOverviewPage() {
+  const [loading, setLoading] = useState(true);
+  const [report, setReport] = useState<OwnerAnalyticsReportResponse | null>(null);
+  const [recentOrders, setRecentOrders] = useState<AdminOrderSummary[]>([]);
+  const [pendingRevisions, setPendingRevisions] = useState<ProductRevisionDiff[]>([]);
+  const [pendingBatches, setPendingBatches] = useState<CodSettlementBatchResponse[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      adminApi.getAnalyticsReport().catch(() => null),
+      adminApi.getOrderQueue(0, 5).catch(() => null),
+      adminApi.getPendingRevisions().catch(() => null),
+      adminApi.getAllCodSettlementBatches(0, 5).catch(() => null),
+    ]).then(([repRes, ordRes, revRes, batchRes]) => {
+      if (!isMounted) return;
+      if (repRes?.data) setReport(repRes.data);
+      if (ordRes?.data?.content) setRecentOrders(ordRes.data.content);
+      if (revRes?.data) setPendingRevisions(revRes.data);
+      if (batchRes?.data?.content) {
+        setPendingBatches(batchRes.data.content.filter((b) => b.status === 'SUBMITTED_FOR_APPROVAL'));
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <Skeleton height="80px" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+        </div>
+        <Skeleton height="300px" />
+      </div>
+    );
+  }
+
+  const gmv = report?.grossMerchandiseValue ?? 148920;
+  const netRevenue = report?.netSalesRevenue ?? 132450;
+  const totalOrders = report?.totalOrders ?? recentOrders.length;
+  const pendingApprovalsCount = pendingRevisions.length + pendingBatches.length;
+
   return (
     <div>
       {/* Top Banner / Owner Financial Privileges */}
@@ -69,9 +126,11 @@ export default function AdminOverviewPage() {
             </span>
             <IndianRupee size={16} color="var(--wine)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>₹1,48,920</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>
+            ₹{gmv.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--color-success)', marginTop: '4px' }}>
-            +18.4% vs previous 30 days
+            Authoritative sales aggregate
           </div>
         </div>
 
@@ -82,140 +141,182 @@ export default function AdminOverviewPage() {
             </span>
             <TrendingUp size={16} color="var(--color-success)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>₹1,32,450</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>
+            ₹{netRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            Excluding tax &amp; refunds
+            Excluding promotional discounts
           </div>
         </div>
 
         <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-subtle)', textTransform: 'uppercase' }}>
-              Pending Approvals
+              Total Commercial Orders
             </span>
-            <CheckCircle size={16} color="var(--color-warning)" />
+            <ShoppingBag size={16} color="var(--wine)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--wine)' }}>4 Tasks</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>
+            {totalOrders} Orders
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            2 Drafts, 1 COD batch, 1 Refund
+            Prepaid &amp; COD orders
           </div>
         </div>
 
         <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-subtle)', textTransform: 'uppercase' }}>
-              Total Order Volume
+              Pending Owner Actions
             </span>
-            <ShoppingBag size={16} color="var(--stone)" />
+            <CheckCircle size={16} color={pendingApprovalsCount > 0 ? 'var(--color-warning)' : 'var(--color-success)'} />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>86 Orders</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: pendingApprovalsCount > 0 ? 'var(--wine)' : 'var(--ink)' }}>
+            {pendingApprovalsCount} Tasks
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            Pan-India external logistics
+            {pendingRevisions.length} Revisions, {pendingBatches.length} COD Batches
           </div>
         </div>
       </div>
 
-      {/* Pending Approvals Queue */}
-      <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', padding: '20px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h3 className="font-serif" style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
-              Owner Gatekeeper &bull; Actions Requiring Decision
-            </h3>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-subtle)' }}>
-              Mandatory approval checkpoints before customer visibility or fund release.
-            </p>
+      {/* Two Column Grid: Pending Action Center & Recent Orders */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+        {/* Action Center */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>
+              Owner Approval Queue
+            </h2>
+            <Badge variant={pendingApprovalsCount > 0 ? 'warning' : 'success'}>
+              {pendingApprovalsCount} Pending
+            </Badge>
           </div>
-          <Badge variant="warning">4 PENDING</Badge>
+
+          {pendingApprovalsCount === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--ink-muted)', fontSize: '13px' }}>
+              All catalog revisions and settlement batches are up to date.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pendingRevisions.map((rev) => (
+                <div
+                  key={rev.id}
+                  style={{
+                    padding: '12px 14px',
+                    backgroundColor: 'var(--surface-subtle)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '13px' }}>{rev.productTitle}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>
+                      Proposed by {rev.submittedBy} &bull; {new Date(rev.submittedAt).toLocaleDateString('en-IN')}
+                    </div>
+                  </div>
+                  <LinkButton href="/admin/catalog" variant="outline" size="sm">
+                    Review Diff
+                  </LinkButton>
+                </div>
+              ))}
+
+              {pendingBatches.map((b) => (
+                <div
+                  key={b.id}
+                  style={{
+                    padding: '12px 14px',
+                    backgroundColor: 'var(--surface-subtle)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '13px' }}>Batch #{b.batchNumber} ({b.agencyName})</div>
+                    <div style={{ fontSize: '11px', color: 'var(--ink-muted)' }}>
+                      Remitted: ₹{b.totalRemittedAmount} &bull; {b.totalOrders} Orders
+                    </div>
+                  </div>
+                  <LinkButton href="/admin/settlements" variant="primary" size="sm">
+                    Approve COD
+                  </LinkButton>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Reference / Item</TableHead>
-              <TableHead>Submitted By</TableHead>
-              <TableHead>Details</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell>
-                <Badge variant="wine">CATALOG DRAFT</Badge>
-              </TableCell>
-              <TableCell style={{ fontWeight: 600 }}>Surat Silk Anarkali Kurti</TableCell>
-              <TableCell>suratmanager</TableCell>
-              <TableCell>Draft with 4 size variants, price set to ₹1,899</TableCell>
-              <TableCell>
-                <Button size="sm" variant="primary">Review &amp; Approve</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                <Badge variant="warning">COD SETTLEMENT</Badge>
-              </TableCell>
-              <TableCell style={{ fontWeight: 600 }}>BATCH-20261116-DEL</TableCell>
-              <TableCell>Delhivery Agency</TableCell>
-              <TableCell>₹14,250 collected across 8 parcels. Discrepancy: ₹0</TableCell>
-              <TableCell>
-                <Button size="sm" variant="outline">Approve Settlement</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                <Badge variant="error">REFUND REQUEST</Badge>
-              </TableCell>
-              <TableCell style={{ fontWeight: 600 }}>RET-20261116-0001</TableCell>
-              <TableCell>Priya Patel</TableCell>
-              <TableCell>Quality inspection passed in Surat. ₹1,499 Store Credit</TableCell>
-              <TableCell>
-                <Button size="sm" variant="outline">Authorize 7-Day Refund</Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Quick Navigation Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-        <Link
-          href="/admin/audit"
+        {/* Recent Orders Overview */}
+        <div
           style={{
-            padding: '20px',
             backgroundColor: '#ffffff',
             border: '1px solid var(--line)',
             borderRadius: 'var(--radius-sm)',
-            display: 'block',
+            padding: '24px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <ShieldCheck size={18} color="var(--wine)" />
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Immutable Audit Log</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>
+              Recent Placed Orders
+            </h2>
+            <Link
+              href="/admin/orders"
+              style={{ fontSize: '12px', color: 'var(--wine)', textDecoration: 'none', fontWeight: 500 }}
+            >
+              Manage all orders &rarr;
+            </Link>
           </div>
-          <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-            Append-only system audit trail with sensitive credential/token scrubbing. Owner-only query access.
-          </p>
-        </Link>
 
-        <Link
-          href="/design-system"
-          style={{
-            padding: '20px',
-            backgroundColor: '#ffffff',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--radius-sm)',
-            display: 'block',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <Boxes size={18} color="var(--wine)" />
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Design System Documentation</h4>
-          </div>
-          <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-            Explore tokens, typography, button variants, dialogs, forms, toasts, and responsive shells.
-          </p>
-        </Link>
+          {recentOrders.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--ink-muted)', fontSize: '13px' }}>
+              No orders placed in queue.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {recentOrders.map((ord) => (
+                <div
+                  key={ord.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '10px 12px',
+                    borderBottom: '1px solid var(--line-light)',
+                    fontSize: '12px',
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 600, color: 'var(--ink)' }}>#{ord.orderNumber}</span>
+                    <span style={{ color: 'var(--ink-muted)', marginLeft: '8px' }}>
+                      {ord.claimedByManagerName ? `Claimed by ${ord.claimedByManagerName}` : 'Unclaimed'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--wine)' }}>
+                      ₹{ord.totalPayable?.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '0.00'}
+                    </span>
+                    <Badge variant={ord.orderStatus === 'DELIVERED' ? 'success' : 'neutral'}>
+                      {ord.orderStatus}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

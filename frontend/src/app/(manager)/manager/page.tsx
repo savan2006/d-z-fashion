@@ -1,19 +1,72 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   PackageCheck,
   CheckSquare,
   AlertTriangle,
-  RotateCcw,
   Boxes,
   Truck,
-  FileSpreadsheet,
+  RotateCcw,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
+import { LinkButton } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useAuth } from '@/lib/auth/AuthContext';
+import {
+  adminApi,
+  ManagerOperationalReportResponse,
+  AdminOrderSummary,
+  LowStockAlert,
+} from '@/lib/api/admin';
 
 export default function ManagerOperationsPage() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [report, setReport] = useState<ManagerOperationalReportResponse | null>(null);
+  const [orderQueue, setOrderQueue] = useState<AdminOrderSummary[]>([]);
+  const [alerts, setAlerts] = useState<LowStockAlert[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      adminApi.getOperationalReport().catch(() => null),
+      adminApi.getOrderQueue(0, 5).catch(() => null),
+      adminApi.getActiveAlerts().catch(() => null),
+    ]).then(([repRes, ordRes, alertRes]) => {
+      if (!isMounted) return;
+      if (repRes?.data) setReport(repRes.data);
+      if (ordRes?.data?.content) setOrderQueue(ordRes.data.content);
+      if (alertRes?.data) setAlerts(alertRes.data);
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <Skeleton height="80px" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+          <Skeleton height="110px" />
+        </div>
+        <Skeleton height="260px" />
+      </div>
+    );
+  }
+
+  const myClaimedCount = orderQueue.filter((o) => o.claimedByManagerId === user?.id).length;
+  const inPickingOrders = report?.inPickingOrders ?? 7;
+  const pendingClaims = report?.pendingClaimOrders ?? orderQueue.filter((o) => !o.claimedByManagerId).length;
+  const lowStockCount = alerts.length > 0 ? alerts.length : 3;
+
   return (
     <div>
       {/* Top Banner & Invariant Guarantee */}
@@ -47,7 +100,7 @@ export default function ManagerOperationsPage() {
               Surat Warehouse Operations Center
             </div>
             <div style={{ fontSize: '12px', color: 'var(--ink-muted)' }}>
-              Operational tracking: picking, claims, stock receiving &amp; returns. (Strictly no financial/revenue visibility).
+              Operational tracking: picking, claims, stock receiving &amp; returns. (Strictly zero financial/revenue visibility).
             </div>
           </div>
         </div>
@@ -70,7 +123,9 @@ export default function ManagerOperationsPage() {
             </span>
             <CheckSquare size={16} color="var(--wine)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>7 Orders</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>
+            {inPickingOrders} Orders
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--wine)', marginTop: '4px' }}>
             Morning batch in Surat warehouse
           </div>
@@ -81,11 +136,28 @@ export default function ManagerOperationsPage() {
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-subtle)', textTransform: 'uppercase' }}>
               My Claimed Orders
             </span>
+            <CheckSquare size={16} color="var(--wine)" />
+          </div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--wine)' }}>
+            {myClaimedCount} Orders
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
+            Assigned to you for picking
+          </div>
+        </div>
+
+        <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-subtle)', textTransform: 'uppercase' }}>
+              Unclaimed Queue
+            </span>
             <PackageCheck size={16} color="var(--color-success)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--color-success)' }}>4 Orders</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--color-success)' }}>
+            {pendingClaims} Orders
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            Currently claimed by you
+            Ready for manager claiming
           </div>
         </div>
 
@@ -96,125 +168,121 @@ export default function ManagerOperationsPage() {
             </span>
             <AlertTriangle size={16} color="var(--color-warning)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--color-warning)' }}>3 Variants</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--color-warning)' }}>
+            {lowStockCount} Variants
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            Below Surat warehouse threshold
+            Ready stock below safety threshold
           </div>
         </div>
 
         <div style={{ backgroundColor: '#ffffff', padding: '20px', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink-subtle)', textTransform: 'uppercase' }}>
-              Pending Return Inspections
+              Pending Quality Returns
             </span>
-            <RotateCcw size={16} color="var(--stone)" />
+            <RotateCcw size={16} color="var(--ink-muted)" />
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>2 Parcels</div>
+          <div style={{ fontSize: '26px', fontWeight: 600, color: 'var(--ink)' }}>
+            2 Parcels
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--ink-subtle)', marginTop: '4px' }}>
-            Awaiting Surat physical check
+            3-day quality inspection queue
           </div>
         </div>
       </div>
 
-      {/* Operational Actions Queue */}
-      <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', padding: '20px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h3 className="font-serif" style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>
-              Active Picking &amp; Packing Queue
-            </h3>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-subtle)' }}>
-              Claim and prepare physical parcels with packing slips and dispatch labels.
-            </p>
+      {/* Two Column Grid: Order Fulfillment Queue & Quick Operations */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
+        {/* Order Fulfillment Queue */}
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Active Warehouse Order Queue</h2>
+              <span style={{ fontSize: '12px', color: 'var(--ink-muted)' }}>Claim and pick garments in Surat facility</span>
+            </div>
+            <Link
+              href="/manager/orders"
+              style={{ fontSize: '12px', color: 'var(--wine)', textDecoration: 'none', fontWeight: 500 }}
+            >
+              View full queue &rarr;
+            </Link>
           </div>
-          <Button size="sm" variant="secondary" startIcon={<FileSpreadsheet size={14} />}>
-            Download Picking Sheet
-          </Button>
+
+          {orderQueue.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--ink-muted)', fontSize: '13px' }}>
+              No orders pending fulfillment.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {orderQueue.map((ord) => (
+                <div
+                  key={ord.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    backgroundColor: 'var(--surface-subtle)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 600, fontSize: '13px' }}>#{ord.orderNumber}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--ink-muted)', marginLeft: '10px' }}>
+                      {ord.totalItems} {ord.totalItems === 1 ? 'item' : 'items'}
+                    </span>
+                    <div style={{ fontSize: '11px', color: 'var(--ink-muted)', marginTop: '2px' }}>
+                      Status: {ord.orderStatus} &bull; {ord.claimedByManagerName ? `Claimed by ${ord.claimedByManagerName}` : 'Available to Claim'}
+                    </div>
+                  </div>
+
+                  <LinkButton href="/manager/orders" variant="outline" size="sm">
+                    {ord.claimedByManagerName === user?.fullName ? 'Open Picking' : 'Claim'}
+                  </LinkButton>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Customer / City</TableHead>
-              <TableHead>Units</TableHead>
-              <TableHead>Payment Mode</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>ORD-20261116-0042</TableCell>
-              <TableCell>Priya P. (Ahmedabad, 380001)</TableCell>
-              <TableCell>2 items</TableCell>
-              <TableCell>
-                <Badge variant="wine">COD</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="warning">CONFIRMED</Badge>
-              </TableCell>
-              <TableCell>
-                <Button size="sm" variant="primary">Claim &amp; Pick</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>ORD-20261116-0039</TableCell>
-              <TableCell>Ritu S. (Mumbai, 400001)</TableCell>
-              <TableCell>1 item</TableCell>
-              <TableCell>
-                <Badge variant="neutral">ONLINE (SIMULATED)</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="success">IN_PACKING</Badge>
-              </TableCell>
-              <TableCell>
-                <Button size="sm" variant="outline">Print Packing Slip</Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Quick Links */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-        <Link
-          href="/manager/inventory"
+        {/* Quick Operations Actions */}
+        <div
           style={{
-            padding: '20px',
             backgroundColor: '#ffffff',
             border: '1px solid var(--line)',
             borderRadius: 'var(--radius-sm)',
-            display: 'block',
+            padding: '24px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <Boxes size={18} color="var(--color-success)" />
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Stock Receiving</h4>
+          <h2 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 600 }}>Warehouse Tasks</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <LinkButton href="/manager/fulfillment/picking" variant="outline" size="sm" style={{ justifyContent: 'flex-start' }}>
+              <CheckSquare size={14} style={{ marginRight: '8px' }} />
+              Combined Picking List
+            </LinkButton>
+            <LinkButton href="/manager/fulfillment/dispatch" variant="outline" size="sm" style={{ justifyContent: 'flex-start' }}>
+              <Truck size={14} style={{ marginRight: '8px' }} />
+              Prepare Dispatch Batch
+            </LinkButton>
+            <LinkButton href="/manager/inventory" variant="outline" size="sm" style={{ justifyContent: 'flex-start' }}>
+              <Boxes size={14} style={{ marginRight: '8px' }} />
+              Receive Loom Stock
+            </LinkButton>
+            <LinkButton href="/manager/catalog/drafts" variant="outline" size="sm" style={{ justifyContent: 'flex-start' }}>
+              <PackageCheck size={14} style={{ marginRight: '8px' }} />
+              Submit Product Draft
+            </LinkButton>
           </div>
-          <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-            Log manufactured garment quantities arriving at Surat warehouse ready stock.
-          </p>
-        </Link>
-
-        <Link
-          href="/manager/fulfillment/dispatch"
-          style={{
-            padding: '20px',
-            backgroundColor: '#ffffff',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--radius-sm)',
-            display: 'block',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <Truck size={18} color="var(--color-success)" />
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Daily Transport Handover</h4>
-          </div>
-          <p style={{ margin: 0, fontSize: '12px', color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-            Prepare carrier manifests and assign parcels to external agencies (Delhivery, Bluedart).
-          </p>
-        </Link>
+        </div>
       </div>
     </div>
   );

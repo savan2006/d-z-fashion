@@ -19,6 +19,8 @@ import {
   LifeBuoy,
   ShieldAlert,
   ArrowLeft,
+  BarChart3,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 const OWNER_NAV_GROUPS = [
@@ -26,6 +28,7 @@ const OWNER_NAV_GROUPS = [
     title: 'Business & Insights',
     items: [
       { label: 'Overview & Analytics', href: '/admin', icon: LayoutDashboard },
+      { label: 'Financial Reports', href: '/admin/reports', icon: BarChart3 },
       { label: 'Audit Trail', href: '/admin/audit', icon: ShieldAlert },
     ],
   },
@@ -36,6 +39,7 @@ const OWNER_NAV_GROUPS = [
       { label: 'Price Management', href: '/admin/pricing', icon: DollarSign },
       { label: 'Categories & Tax', href: '/admin/categories', icon: Tags },
       { label: 'Coupons & Campaigns', href: '/admin/promotions', icon: Percent },
+      { label: 'Store Banners & Media', href: '/admin/content', icon: ImageIcon },
     ],
   },
   {

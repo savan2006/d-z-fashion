@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
@@ -28,7 +28,7 @@ describe('Layout Shells and Role Boundaries', () => {
   });
 
   describe('Owner Administration Shell', () => {
-    it('renders Owner badge and full financial and audit controls', () => {
+    it('renders Owner badge and full financial and audit controls', async () => {
       render(
         <AuthProvider>
           <AdminSidebar />
@@ -36,16 +36,18 @@ describe('Layout Shells and Role Boundaries', () => {
         </AuthProvider>
       );
 
-      expect(screen.getByText('Owner Admin')).toBeDefined();
-      expect(screen.getByText('Overview & Analytics')).toBeDefined();
-      expect(screen.getByText('Audit Trail')).toBeDefined();
-      expect(screen.getByText('Gross Merchandise Value')).toBeDefined();
-      expect(screen.getByText('Net Settled Revenue')).toBeDefined();
+      await waitFor(() => {
+        expect(screen.getByText('Owner Admin')).toBeDefined();
+        expect(screen.getByText('Overview & Analytics')).toBeDefined();
+        expect(screen.getByText('Audit Trail')).toBeDefined();
+        expect(screen.getByText('Gross Merchandise Value')).toBeDefined();
+        expect(screen.getByText('Net Settled Revenue')).toBeDefined();
+      });
     });
   });
 
   describe('Manager Operational Shell (Strict Invariant: Zero Financial Data)', () => {
-    it('renders operational queues and strictly ZERO revenue, profit, or GMV metrics', () => {
+    it('renders operational queues and strictly ZERO revenue, profit, or GMV metrics', async () => {
       const { container } = render(
         <AuthProvider>
           <ManagerSidebar />
@@ -53,11 +55,12 @@ describe('Layout Shells and Role Boundaries', () => {
         </AuthProvider>
       );
 
-      // Verify Manager indicators
-      expect(screen.getByText('Operations Manager')).toBeDefined();
-      expect(screen.getByText('Orders in Picking')).toBeDefined();
-      expect(screen.getByText('My Claimed Orders')).toBeDefined();
-      expect(screen.getByText('Low-Stock Warnings')).toBeDefined();
+      await waitFor(() => {
+        expect(screen.getByText('Operations Manager')).toBeDefined();
+        expect(screen.getByText('Orders in Picking')).toBeDefined();
+        expect(screen.getByText('My Claimed Orders')).toBeDefined();
+        expect(screen.getByText('Low-Stock Warnings')).toBeDefined();
+      });
 
       // STRICT INVARIANT CHECK: Zero financial terms in Manager operational view
       const text = container.textContent || '';
