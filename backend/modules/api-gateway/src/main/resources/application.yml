@@ -4,11 +4,27 @@ spring:
   cloud:
     gateway:
       mvc:
+        cors:
+          allowed-origins:
+            - "http://localhost:3000"
+            - "http://127.0.0.1:3000"
+            - "${CORS_ALLOWED_ORIGIN:http://localhost:3000}"
+          allowed-methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - OPTIONS
+          allowed-headers:
+            - "*"
+          allow-credentials: true
+          max-age: 3600
         routes:
           - id: identity-service
             uri: http://${IDENTITY_HOST:localhost}:${IDENTITY_PORT:8081}
             predicates:
-              - Path=/api/v1/auth/**, /api/v1/users/**
+              - Path=/api/v1/auth/**, /api/v1/users/**, /api/v1/admin/managers/**
           - id: catalog-service
             uri: http://${CATALOG_HOST:localhost}:${CATALOG_PORT:8082}
             predicates:
@@ -16,7 +32,7 @@ spring:
           - id: inventory-service
             uri: http://${INVENTORY_HOST:localhost}:${INVENTORY_PORT:8083}
             predicates:
-              - Path=/api/v1/inventory/**
+              - Path=/api/v1/inventory/**, /api/v1/admin/inventory/**
           - id: commerce-service
             uri: http://${COMMERCE_HOST:localhost}:${COMMERCE_PORT:8084}
             predicates:
@@ -24,7 +40,7 @@ spring:
           - id: payment-service
             uri: http://${PAYMENT_HOST:localhost}:${PAYMENT_PORT:8085}
             predicates:
-              - Path=/api/v1/payments/**, /api/v1/coupons/**, /api/v1/store-credit/**, /api/v1/invoices/**, /api/v1/tax/**
+              - Path=/api/v1/payments/**, /api/v1/promotions/**, /api/v1/admin/promotions/**, /api/v1/store-credit/**, /api/v1/invoices/**, /api/v1/admin/cod-settlements/**, /api/v1/admin/financial-reports/**, /api/v1/admin/tax-classifications/**, /api/v1/coupons/**, /api/v1/tax/**
           - id: fulfillment-service
             uri: http://${FULFILLMENT_HOST:localhost}:${FULFILLMENT_PORT:8086}
             predicates:
