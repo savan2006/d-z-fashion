@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
@@ -8,18 +8,6 @@ import { ManagerSidebar } from '@/components/layout/ManagerSidebar';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import ManagerOperationsPage from '@/app/(manager)/manager/page';
 import AdminOverviewPage from '@/app/(owner)/admin/page';
-
-// Mock Next.js navigation
-const mockPush = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-  }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-}));
 
 describe('Layout Shells and Role Boundaries', () => {
   describe('Storefront Shell', () => {
