@@ -1,38 +1,56 @@
 /* ==========================================================================
    D & Z FASHION — DESIGN SYSTEM TOKENS & APPLICATION STYLES
-   Editorial, restrained luxury fashion aesthetic with Surat craft heritage
+   Royal Surat Craftsmanship & Luxury Women's Ethnic Wear Haute Couture
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
 :root {
-  /* --- Color Palette: Warm Ivory & Paper --- */
-  --paper: #fcfbf8;
-  --paper-warm: #f7f4ef;
-  --paper-deep: #eee8df;
+  /* --- Color Palette: Warm Ivory & Silk Cashmere --- */
+  --paper: #fcfbf7;
+  --paper-warm: #f8f4ed;
+  --paper-deep: #eee6d8;
   --paper-card: #ffffff;
 
-  /* --- Color Palette: Charcoal & Ink --- */
-  --ink: #24211e;
-  --ink-muted: #57514a;
-  --ink-subtle: #8c8278;
+  /* --- Color Palette: Charcoal & Royal Ink --- */
+  --ink: #1e1917;
+  --ink-muted: #524a44;
+  --ink-subtle: #857b72;
 
-  /* --- Color Palette: Restrained Wine / Burgundy --- */
-  --wine: #6d2836;
-  --wine-dark: #4a1822;
-  --wine-light: #8c3a4b;
-  --wine-soft: #fbf2f4;
-  --wine-border: #e8d0d6;
+  /* --- Color Palette: Royal Wine & Deep Crimson --- */
+  --wine: #6d1a29;
+  --wine-dark: #460e18;
+  --wine-light: #8e2337;
+  --wine-soft: #faf0f2;
+  --wine-border: #e8c7cf;
+  --wine-gradient: linear-gradient(135deg, #781d2e 0%, #460e18 100%);
 
-  /* --- Color Palette: Muted Rose --- */
+  /* --- Color Palette: Royal Gold & Handcrafted Zari --- */
+  --gold-primary: #c59b27;
+  --gold-light: #f6e8b1;
+  --gold-dark: #987216;
+  --gold-soft: #fcf9ee;
+  --gold-border: #e6cb78;
+  --gold-gradient: linear-gradient(135deg, #dfc15d 0%, #b38a2e 50%, #f6e8b1 100%);
+  --gold-metallic: linear-gradient(90deg, #b38a2e 0%, #f6e8b1 50%, #b38a2e 100%);
+
+  /* --- Color Palette: Royal Emerald --- */
+  --emerald: #0f4c3a;
+  --emerald-light: #1b7358;
+  --emerald-soft: #f0f7f4;
+  --emerald-border: #c2e2d5;
+
+  /* --- Color Palette: Muted Rose & Blush Quartz --- */
   --rose: #c48b9f;
-  --rose-soft: #fcf6f8;
-  --rose-border: #eddfe4;
+  --rose-soft: #fcf4f7;
+  --rose-border: #ebd5dd;
 
   /* --- Color Palette: Warm Stone & Lines --- */
   --stone: #8a8278;
-  --stone-light: #ece8e2;
-  --stone-deep: #423d38;
-  --line: #ded5ca;
-  --line-subtle: #ece6de;
+  --stone-light: #ede7df;
+  --stone-deep: #3b3530;
+  --line: #ded3c4;
+  --line-subtle: #eae2d7;
 
   /* --- Semantic Colors --- */
   --color-success: #1b7340;
@@ -55,8 +73,9 @@
   --color-disabled-border: #e7e5e4;
 
   /* --- Typography Families --- */
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* --- Typography Fluid Scale --- */
@@ -191,17 +210,75 @@ input, select, textarea {
 
 /* --- Storefront Layout Primitives --- */
 .announcement-bar {
-  min-height: 32px;
-  padding: 6px 16px;
+  min-height: 36px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--wine);
+  background: linear-gradient(90deg, #3d0a14 0%, #6d1a29 50%, #3d0a14 100%);
   color: #fffaf4;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: center;
+  border-bottom: 1px solid rgba(223, 193, 93, 0.35);
+}
+
+/* --- Royal Ladies Ethnic Wear Luxury Utilities --- */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.gold-gradient-text {
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border {
+  border: 1px solid var(--gold-border);
+}
+
+.gold-pill {
+  background-color: var(--gold-soft);
+  color: var(--gold-dark);
+  border: 1px solid var(--gold-border);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+
+.luxury-card {
+  background-color: #ffffff;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 20px -2px rgba(45, 20, 26, 0.05);
+  transition: all var(--transition-normal);
+}
+
+.luxury-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -6px rgba(109, 26, 41, 0.12);
+  border-color: var(--gold-border);
+}
+
+.shimmer-gold {
+  position: relative;
+  overflow: hidden;
+}
+
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.ornament-divider::before,
+.ornament-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
 }
 
 .storefront-header {

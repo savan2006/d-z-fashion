@@ -1,8 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="520" height="164" viewBox="0 0 520 164" role="img" aria-labelledby="title desc">
   <title id="title">D and Z Fashion</title>
-  <desc id="desc">Original typographic D and Z Fashion wordmark.</desc>
+  <desc id="desc">Luxury typography wordmark for D &amp; Z Fashion Surat.</desc>
+  <defs>
+    <linearGradient id="wmGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b38a2e"/>
+      <stop offset="30%" stop-color="#dfc15d"/>
+      <stop offset="60%" stop-color="#9a701d"/>
+      <stop offset="100%" stop-color="#dfc15d"/>
+    </linearGradient>
+    <linearGradient id="wmWine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6b1426"/>
+      <stop offset="100%" stop-color="#4a0e1a"/>
+    </linearGradient>
+  </defs>
+
   <rect width="520" height="164" fill="none"/>
-  <text x="4" y="91" fill="#6d333e" font-family="Georgia, 'Times New Roman', serif" font-size="88" letter-spacing="-8">D&amp;Z</text>
-  <path d="M8 111H510" stroke="#b8a99b" stroke-width="1"/>
-  <text x="13" y="143" fill="#49413b" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="9">F A S H I O N</text>
+
+  <!-- Ornate Royal Crown / Lotus Emblem -->
+  <g transform="translate(260, 24) scale(0.85)">
+    <path d="M-18 6 L-8 12 L0 0 L8 12 L18 6 L12 18 L-12 18 Z" fill="url(#wmGold)"/>
+    <circle cx="0" cy="-2" r="2" fill="url(#wmGold)"/>
+  </g>
+
+  <!-- Main Luxury Brand Name: D & Z -->
+  <text x="260" y="88" fill="url(#wmWine)" font-family="'Playfair Display', 'Cormorant Garamond', 'Georgia', serif" font-size="76" font-weight="700" letter-spacing="4" text-anchor="middle">
+    D <tspan fill="url(#wmGold)" font-size="64" font-weight="400">&amp;</tspan> Z
+  </text>
+
+  <!-- Hairline Gold Accent Rules with Diamond Motif -->
+  <line x1="60" y1="106" x2="230" y2="106" stroke="url(#wmGold)" stroke-width="1.2"/>
+  <polygon points="260,103 263,106 260,109 257,106" fill="url(#wmGold)"/>
+  <line x1="290" y1="106" x2="460" y2="106" stroke="url(#wmGold)" stroke-width="1.2"/>
+
+  <!-- Subtitle: FASHION -->
+  <text x="260" y="128" fill="#2d2725" font-family="'Cinzel', 'Playfair Display', -apple-system, sans-serif" font-size="16" font-weight="600" letter-spacing="14" text-anchor="middle">
+    F A S H I O N
+  </text>
+
+  <!-- Tagline: HAUTE COUTURE SURAT -->
+  <text x="260" y="148" fill="#8c8278" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="500" letter-spacing="4" text-anchor="middle">
+    HAUTE COUTURE SURAT &bull; EST. 2026
+  </text>
 </svg>
