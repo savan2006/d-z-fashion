@@ -1,6 +1,6 @@
 spring:
   application:
-  name: fulfillment-service
+    name: fulfillment-service
   datasource:
     url: ${SUPABASE_JDBC_URL:}
     username: ${FULFILLMENT_DB_USERNAME:postgres}

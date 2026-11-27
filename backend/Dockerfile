@@ -15,7 +15,7 @@ COPY modules/fulfillment-service/pom.xml modules/fulfillment-service/
 
 # Copy all module sources and build package
 COPY modules/ modules/
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests -B
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw clean package -DskipTests -B
 
 # Minimal Alpine JRE runtime stage
 FROM eclipse-temurin:21-jre-alpine AS runner

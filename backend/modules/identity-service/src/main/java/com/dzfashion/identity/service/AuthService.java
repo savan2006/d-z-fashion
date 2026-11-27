@@ -54,8 +54,12 @@ public class AuthService {
 
     @Transactional
     public OtpInitiateResponse initiateSignup(SignupInitiateRequest request) {
-        String normalizedUsername = request.username().trim();
         String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedUsername = (request.username() != null && !request.username().isBlank())
+                ? request.username().trim()
+                : (request.fullName() != null && !request.fullName().isBlank())
+                    ? request.fullName().trim().toLowerCase().replaceAll("[^a-zA-Z0-9_.]", "")
+                    : normalizedEmail.split("@")[0];
 
         if (userRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
             throw new ResourceConflictException("Username is already taken");
@@ -86,7 +90,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponse completeSignup(SignupCompleteRequest request, String clientProvidedUsername) {
-        String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedEmail = (request.email() != null && !request.email().isBlank())
+                ? request.email().trim().toLowerCase()
+                : emailOtpService.getEmailFromTicket(request.verificationTicket());
 
         emailOtpService.validateVerificationTicket(normalizedEmail, request.verificationTicket(), OtpPurpose.REGISTRATION);
 
@@ -96,7 +102,9 @@ public class AuthService {
 
         String username = (clientProvidedUsername != null && !clientProvidedUsername.isBlank())
                 ? clientProvidedUsername.trim()
-                : normalizedEmail.split("@")[0];
+                : (request.fullName() != null && !request.fullName().isBlank())
+                    ? request.fullName().trim().toLowerCase().replaceAll("[^a-zA-Z0-9_.]", "")
+                    : normalizedEmail.split("@")[0];
 
         if (userRepository.existsByUsernameIgnoreCase(username)) {
             username = username + "_" + System.currentTimeMillis() % 10000;
@@ -106,7 +114,10 @@ public class AuthService {
 
         // Public signup can NEVER grant privileged roles; always hardcoded to CUSTOMER
         UserEntity user = new UserEntity(username, normalizedEmail, passwordHash, Role.CUSTOMER);
-        CustomerProfileEntity profile = new CustomerProfileEntity(user, request.fullName().trim());
+        String fullName = (request.fullName() != null && !request.fullName().isBlank())
+                ? request.fullName().trim()
+                : username;
+        CustomerProfileEntity profile = new CustomerProfileEntity(user, fullName);
         user.setProfile(profile);
 
         UserEntity savedUser = userRepository.save(user);
@@ -185,7 +196,9 @@ public class AuthService {
 
     @Transactional
     public ActionResponse completeForgotPassword(ResetPasswordRequest request) {
-        String normalizedEmail = request.email().trim().toLowerCase();
+        String normalizedEmail = (request.email() != null && !request.email().isBlank())
+                ? request.email().trim().toLowerCase()
+                : emailOtpService.getEmailFromTicket(request.resetTicket());
 
         emailOtpService.validateVerificationTicket(normalizedEmail, request.resetTicket(), OtpPurpose.PASSWORD_RESET);
 

@@ -53,7 +53,7 @@ function SignupFormContent() {
 
     setLoading(true);
     try {
-      const res = await customerApi.initiateSignup(email.trim(), fullName.trim());
+      const res = await customerApi.initiateSignup(email.trim(), fullName.trim(), username.trim());
       setCountdown(res.data.expiresInSeconds || 60);
       setStep('OTP');
       toast({
@@ -80,7 +80,7 @@ function SignupFormContent() {
     setLoading(true);
     try {
       const res = await customerApi.verifySignupOtp(email.trim(), otp.trim());
-      setOtpToken(res.data.otpToken);
+      setOtpToken(res.data.verificationTicket || res.data.otpToken);
       setStep('PASSWORD');
       toast({ type: 'success', title: 'Email Verified', message: 'Please set your account password.' });
     } catch (err: unknown) {
@@ -96,7 +96,7 @@ function SignupFormContent() {
     if (!canResend) return;
     setLoading(true);
     try {
-      const res = await customerApi.initiateSignup(email.trim(), fullName.trim());
+      const res = await customerApi.initiateSignup(email.trim(), fullName.trim(), username.trim());
       setCountdown(res.data.expiresInSeconds || 60);
       setOtp('');
       toast({ type: 'info', title: 'Code Resent', message: 'A new 4-digit code has been sent.' });
@@ -122,7 +122,14 @@ function SignupFormContent() {
 
     setLoading(true);
     try {
-      const res = await customerApi.completeSignup(otpToken, password, confirmPassword, username.trim());
+      const res = await customerApi.completeSignup(
+        otpToken,
+        password,
+        confirmPassword,
+        username.trim(),
+        email.trim(),
+        fullName.trim()
+      );
       if (res.data) {
         // Automatically log user in
         login(res.data.accessToken, res.data.user);

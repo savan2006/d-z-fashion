@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const res = await customerApi.verifyForgotPasswordOtp(email.trim(), otp.trim());
-      setOtpToken(res.data.otpToken);
+      setOtpToken(res.data.verificationTicket || res.data.otpToken);
       setStep('PASSWORD');
       toast({ type: 'success', title: 'Code Verified', message: 'Enter your new password.' });
     } catch (err: unknown) {
@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await customerApi.completeForgotPassword(otpToken, newPassword, confirmPassword);
+      await customerApi.completeForgotPassword(otpToken, newPassword, confirmPassword, email.trim());
       setStep('SUCCESS');
       toast({ type: 'success', title: 'Password Reset', message: 'Your password has been updated.' });
     } catch (err: unknown) {

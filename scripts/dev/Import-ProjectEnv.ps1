@@ -28,5 +28,6 @@ Get-Content -LiteralPath $resolved | ForEach-Object {
         $value = $value.Substring(1, $value.Length - 2)
     }
     [Environment]::SetEnvironmentVariable($name, $value, 'Process')
+    Set-Item -Path "env:$name" -Value $value
 }
 Write-Host "Loaded local environment variables from $resolved" -ForegroundColor Green

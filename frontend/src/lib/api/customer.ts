@@ -11,7 +11,9 @@ export interface OtpInitiateResponse {
 export interface VerifyOtpResponse {
   email: string;
   otpToken: string;
+  verificationTicket?: string;
   message: string;
+  expiresInSeconds?: number;
 }
 
 export interface AuthUser {
@@ -89,7 +91,7 @@ export interface CartResponse {
 }
 
 // Checkout DTOs
-export type PaymentMethod = 'SIMULATED_ONLINE' | 'CASH_ON_DELIVERY';
+export type PaymentMethod = 'SIMULATED_ONLINE' | 'COD' | 'CASH_ON_DELIVERY';
 
 export interface CheckoutPreviewRequest {
   paymentMethod: PaymentMethod;
@@ -319,8 +321,8 @@ export interface ProductReviewSummaryResponse {
 // API methods
 export const customerApi = {
   // Auth
-  initiateSignup: (email: string, fullName: string): Promise<ApiResponse<OtpInitiateResponse>> =>
-    api.post('/api/v1/auth/signup/initiate', { email, fullName }),
+  initiateSignup: (email: string, fullName: string, username?: string): Promise<ApiResponse<OtpInitiateResponse>> =>
+    api.post('/api/v1/auth/signup/initiate', { email, fullName, username }),
 
   verifySignupOtp: (email: string, otp: string): Promise<ApiResponse<VerifyOtpResponse>> =>
     api.post('/api/v1/auth/signup/verify-otp', { email, otp }),
@@ -329,12 +331,21 @@ export const customerApi = {
     otpToken: string,
     password: string,
     confirmPassword: string,
-    username?: string
+    username?: string,
+    email?: string,
+    fullName?: string
   ): Promise<ApiResponse<AuthResponse>> => {
     const url = username
       ? `/api/v1/auth/signup/complete?username=${encodeURIComponent(username)}`
       : '/api/v1/auth/signup/complete';
-    return api.post(url, { otpToken, password, confirmPassword });
+    return api.post(url, {
+      otpToken,
+      verificationTicket: otpToken,
+      password,
+      confirmPassword,
+      email,
+      fullName,
+    });
   },
 
   login: (identifier: string, password: string): Promise<ApiResponse<AuthResponse>> =>
@@ -349,9 +360,17 @@ export const customerApi = {
   completeForgotPassword: (
     otpToken: string,
     newPassword: string,
-    confirmPassword: string
+    confirmPassword: string,
+    email?: string
   ): Promise<ApiResponse<ActionResponse>> =>
-    api.post('/api/v1/auth/forgot-password/complete', { otpToken, newPassword, confirmPassword }),
+    api.post('/api/v1/auth/forgot-password/complete', {
+      otpToken,
+      resetTicket: otpToken,
+      newPassword,
+      password: newPassword,
+      confirmPassword,
+      email,
+    }),
 
   // User Profile
   getProfile: (): Promise<ApiResponse<UserProfile>> =>

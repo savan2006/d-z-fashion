@@ -40,3 +40,7 @@ Thumbs.db
 *.tmp
 *.swp
 *.bak
+
+# Local offline guides (not pushed to GitHub)
+COMPLETE_PROJECT_GUIDE.md
+LOCAL_PROJECT_GUIDE.md

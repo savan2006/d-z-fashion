@@ -113,6 +113,15 @@ public class EmailOtpService {
         return createVerificationTicket(normalizedEmail, purpose);
     }
 
+    public String getEmailFromTicket(String ticket) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(ticket);
+            return signedJWT.getJWTClaimsSet().getSubject();
+        } catch (Exception e) {
+            throw new InvalidOtpException("Unable to read verification ticket: " + e.getMessage());
+        }
+    }
+
     public void validateVerificationTicket(String email, String ticket, OtpPurpose expectedPurpose) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(ticket);

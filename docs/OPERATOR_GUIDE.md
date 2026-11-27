@@ -121,12 +121,12 @@ cd backend
 To run individual services:
 ```bash
 ./mvnw -pl modules/api-gateway spring-boot:run
-./mvnw -pl modules/identity-access-service spring-boot:run
+./mvnw -pl modules/identity-service spring-boot:run
 ./mvnw -pl modules/catalog-service spring-boot:run
 ./mvnw -pl modules/inventory-service spring-boot:run
 ./mvnw -pl modules/commerce-service spring-boot:run
-./mvnw -pl modules/payment-promotions-tax-service spring-boot:run
-./mvnw -pl modules/fulfillment-transport-service spring-boot:run
+./mvnw -pl modules/payment-service spring-boot:run
+./mvnw -pl modules/fulfillment-service spring-boot:run
 ```
 
 ### Step 2: Start Frontend Application
